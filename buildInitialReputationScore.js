@@ -16,7 +16,7 @@ const sortedBalancesFileName = './KNCBalanceSorted.json';
 const feeSharingWalletsFile = './feeSharingWalletsAdds.json';
 const reservesKncWalletsFile = './reserveKncWalletsAdds.json';
 const reputationScorePath = './kyberDAOReputationScore.json';
-const daoFoundersPath = './kyberDAOFounders.json';
+const daoFoundersPath = './output/kyberDAOFounders.json';
 
 
 process.on('unhandledRejection', console.error.bind(console))
