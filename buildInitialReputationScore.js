@@ -254,7 +254,7 @@ async function getKncPotentialHolders() {
     try {
         holdersJson = JSON.parse(fs.readFileSync(holdersAddressFileName));
 
-        fromBlockNum = holdersJson['lastCheckedBlock'];
+        fromBlockNum = holdersJson['last checked block'];
         toBlockNum = fromBlockNum * 1 + numBlocksPerQuery * 1;
         if (toBlockNum > latest) toBlockNum = latest;
         KNCPotentialHoldersDict = holdersJson['potential holders'];
@@ -282,7 +282,7 @@ async function getKncPotentialHolders() {
             console.log("total transfer events " + totalTransferEvents + " added events: " + KNCTransferEvents.length);
 
             for(let i = 0; i < KNCTransferEvents.length; i++) {
-               let address = KNCTransferEvents[i].returnValues.to;
+               let address = KNCTransferEvents[i].returnValues.to.toLowerCase();
                KNCPotentialHoldersDict[address] = true;
             };
 
@@ -294,7 +294,7 @@ async function getKncPotentialHolders() {
             if (toBlockNum > latest) toBlockNum = 'latest';
         }
 
-        holdersJson['lastCheckedBlock'] = lastCheckedBlock;
+        holdersJson['last checked block'] = lastCheckedBlock;
         holdersJson['transfer events so far'] = totalTransferEvents;
         holdersJson['potential holders'] = KNCPotentialHoldersDict;
 
@@ -340,7 +340,7 @@ async function getFeeSharingWallets() {
         let feeSharingEvents = await feeBurner.getPastEvents("AssignFeeToWallet", {fromBlock: fromBlockNum, toBlock: toBlockNum});
 
         for(let i = 0; i < feeSharingEvents.length; i++) {
-            let address = feeSharingEvents[i].returnValues.wallet;
+            let address = (feeSharingEvents[i].returnValues.wallet).toLowerCase();
 
             feeSharingWalletAddresses[address] = true;
         };
@@ -409,27 +409,18 @@ async function getReserveKNCwalletAddresses() {
         console.log(e);
     }
 
-//    console.log("from block num " + fromBlockNum)
-//    console.log("KNC balance block " + KNCBalanceBlockDec);
-//    while(toBlockNum < KNCBalanceBlockDec) {
-        console.log("query fee reserve knc wallets events from: " + fromBlockNum + " to block: " + toBlockNum);
-        let reserveDataSetEvent = await feeBurner.getPastEvents("ReserveDataSet", {fromBlock: fromBlockNum, toBlock: toBlockNum});
+    console.log("query fee reserve knc wallets events from: " + fromBlockNum + " to block: " + toBlockNum);
+    let reserveDataSetEvent = await feeBurner.getPastEvents("ReserveDataSet", {fromBlock: fromBlockNum, toBlock: toBlockNum});
 
-        console.log("reserveDataSetEvent.length " + reserveDataSetEvent.length)
-        for(let i = 0; i < reserveDataSetEvent.length; i++) {
-            let reserve = reserveDataSetEvent[i].returnValues.reserve;
-            let kncWallet = reserveDataSetEvent[i].returnValues.kncWallet;
+    console.log("reserveDataSetEvent.length " + reserveDataSetEvent.length)
+    for(let i = 0; i < reserveDataSetEvent.length; i++) {
+        let reserve = reserveDataSetEvent[i].returnValues.reserve.toLowerCase();
+        let kncWallet = reserveDataSetEvent[i].returnValues.kncWallet.toLowerCase();
 
-            if(reserve != kncWallet) {
-                reserveKNCWalletAddress[kncWallet] = true;
-            }
-        };
-//        break;
-//
-//        fromBlockNum = toBlockNum;
-//        toBlockNum = toBlockNum * 1 + numBlocksPerQuery * 1;
-//        if(toBlockNum > latest) toBlockNum = 'latest';
-//    }
+        if(reserve != kncWallet) {
+            reserveKNCWalletAddress[kncWallet] = true;
+        }
+    };
 
     console.log('reserveKNCWalletAddress length');
     console.log(Object.keys(reserveKNCWalletAddress).length);
