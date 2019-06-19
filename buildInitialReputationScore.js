@@ -5,20 +5,16 @@ const Web3 = require('web3');
 const fs = require('fs');
 const assert = require('assert');
 const solc = require('solc');
-const parse = require('csv-parse');
 const syncParse = require('csv-parse/lib/sync')
-const parser = parse({
-                 delimiter: ':'
-               })
 
-const tradersFilePath = './trade_reports.csv';
+const tradersFilePath = './input/trade_reports.csv';
+const kyberTeamFileName = './input/kyberTeam.json';
+const prevPollFileName = './input/previous_poll_addresses.json';
 const holdersAddressFileName = './potentialHolders.json';
 const balancesFileName = './KNCBalance.json';
 const sortedBalancesFileName = './KNCBalanceSorted.json';
 const feeSharingWalletsFile = './feeSharingWalletsAdds.json';
 const reservesKncWalletsFile = './reserveKncWalletsAdds.json';
-const kyberTeamFileName = './kyberTeam.json';
-const prevPollFileName = './previous_poll_addresses.json';
 const reputationScorePath = './kyberDAOReputationScore.json';
 const daoFoundersPath = './kyberDAOFounders.json';
 
@@ -41,7 +37,7 @@ const ropstenPublicNode = 'https://ropsten.infura.io';
 const nodeURL = mainnetUrls[1];
 web3 = new Web3(new Web3.providers.HttpProvider(nodeURL));
 
-
+let solcOuput;
 let latest;
 
 const balanceWaterMark = 999;
@@ -71,42 +67,21 @@ const input = {
     "FeeBurnerInterface.sol" : fs.readFileSync(contractPath + 'FeeBurnerInterface.sol', 'utf8')
 }
 
-const jsonContractSource = JSON.stringify({
-    language: 'Solidity',
-    sources: {
-      'Task': {
-          content: input,
-       },
-    },
-    settings: {
-        outputSelection: {
-            '*': {
-                '*': ['abi',"evm.bytecode"],
-             // here point out the output of the compiled result
-            },
-        },
-    },
-});
-
 
 main();
 
-let solcOuput;
+
 
 async function main() {
 
     myLog(0, 0, "starting compilation");
-//console.log(input);
     solcOutput = await solc.compile({ sources: input }, 1);
     console.log(solcOutput.errors);
-//    console.log(solcOutput);
 
     myLog(0, 0, "finished compilation");
 
-
     myLog(1, 0, "read traders CSV");
     let tradersVolumeEth = await readTradersCSV();
-//    return;
     await connectToChain();
 
     latest = await web3.eth.getBlockNumber();
@@ -122,46 +97,47 @@ async function main() {
 
     let potentialHolders = await getKncPotentialHolders();
 
-    let kncBalanceDictAboveVal = await getKncHoldersBalanceDict(potentialHolders, balanceWaterMark);
+    let kncHoldersAboveMinBalance = await getKncHoldersAboveMinBal(potentialHolders, balanceWaterMark);
 
-//    let sortedBalanceDict = await sortHoldersBalanceDict(kncBalanceDictAboveVal);
+    // can create sorted balance array. for comparing.
+//    let sortedBalanceDict = await sortHoldersBalanceDict(kncHoldersAboveMinBalance);
 
-    console.log('kncBalanceDict length');
-    console.log(Object.keys(kncBalanceDictAboveVal).length);
+    console.log('number of KNC holders above min balance');
+    console.log(Object.keys(kncHoldersAboveMinBalance).length);
 
     let daoReputation = {};
     let founders = [];
 
     //build the reputation array.
-    for(let holderAdd in kncBalanceDictAboveVal) {
+    for(let holderAdd in kncHoldersAboveMinBalance) {
         // reputation for knc balance
 
-        let rep = balanceToReputation(kncBalanceDictAboveVal[holderAdd]);
+        let rep = balanceToReputation(kncHoldersAboveMinBalance[holderAdd]);
 
         //extra reputation for trading.
         let tempRep = tradeVolumeToReputation(tradersVolumeEth[holderAdd]);
-        if(tempRep > 0) console.log("address: " + holderAdd + " trading extra rep: " + tempRep);
+//        if(tempRep > 0) console.log("address: " + holderAdd + " trading extra rep: " + tempRep);
         rep = rep * 1 + tempRep * 1;
         tempRep = 0;
 
         //extra reputation for kyber team
         if (kyberTeamAdds[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) console.log("address: " + holderAdd + " kyber team extra rep: " + tempRep);
+//        if(tempRep > 0) console.log("address: " + holderAdd + " kyber team extra rep: " + tempRep);
         rep = rep * 1 + tempRep * 1;
 
         //extra reputation fee sharing wallets
         if (feeSharingWallets[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) console.log("address: " + holderAdd + " fee share extra rep: " + tempRep);
+//        if(tempRep > 0) console.log("address: " + holderAdd + " fee share extra rep: " + tempRep);
         rep = rep * 1 + tempRep * 1;
 
         //extra reputation for reserves
         if (reserveKncWalletsAdds[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) console.log("address: " + holderAdd + " reserve extra rep: " + tempRep);
+//        if(tempRep > 0) console.log("address: " + holderAdd + " reserve extra rep: " + tempRep);
         rep = rep * 1 + tempRep * 1;
 
         //extra reputation for previous poss participants
         if (prevPollAdds[holderAdd] == true) tempRep = 30;
-        if(tempRep > 0) console.log("address: " + holderAdd + " prev poll extra rep: " + tempRep);
+//        if(tempRep > 0) console.log("address: " + holderAdd + " prev poll extra rep: " + tempRep);
         rep = rep * 1 + tempRep * 1;
 
         daoReputation[holderAdd] = rep;
@@ -447,7 +423,6 @@ async function getReserveKNCwalletAddresses() {
 async function readTradersCSV() {
     const input = fs.readFileSync(tradersFilePath);
     console.log("done reading file")
-//    console.log(input)
 
     const tradersRecords = syncParse(input, {
         columns: true,
@@ -461,20 +436,16 @@ async function readTradersCSV() {
 
     console.log("num traders records: " + tradersRecords.length)
     for(let i = 0; i < tradersRecords.length; i++) {
-//    for(let i = 0; i < traders.length; i++) {
         if(tradersRecords[i]['sum'] > minTradeVolumeEth) {
             let address = (tradersRecords[i]['user_addr']).toLowerCase();
             tradersVolumeEth[address] = tradersRecords[i]['sum'];
         }
     }
 
-//    console.log('tradersVolumeEth')
-//    console.log(tradersVolumeEth)
-
     return tradersVolumeEth;
 }
 
-async function getKncHoldersBalanceDict(holdersDict, kncBalanceWaterMark) {
+async function getKncHoldersAboveMinBal(holdersDict, kncBalanceWaterMark) {
 
     let kncBalanceDict = {};
 
@@ -489,12 +460,10 @@ async function getKncHoldersBalanceDict(holdersDict, kncBalanceWaterMark) {
         console.log(e);
     }
 
-//    const minTokenBalance = web3.utils.toBN(kncBalanceWaterMark)
     const web3Bal = new Web3(new Web3.providers.HttpProvider(mainnetUrls[0]), null, {defaultBlock: KNCBalanceBlock});
 //    const web3Bal = web3
 
     const queryBalBlock = await web3Bal.eth.defaultBlock;
-//    const queryBalBlock = await web3Bal.defaultBlock;
     console.log("query balance block: " + queryBalBlock);
 
     const GetBalanceAbi = solcOutput.contracts["GetBalance.sol:GetBalance"].interface;
@@ -509,45 +478,28 @@ async function getKncHoldersBalanceDict(holdersDict, kncBalanceWaterMark) {
     let holdersPartialArray = [];
     let numAddedToPartial = 0;
     let balancesQueriedSoFar = 0;
-    let totalKNCHoldersNum = 0;
+    let totalKNCHolders = 0;
 
-    const debugAdd = '0x6134f697568592392a5AeacaEa8b01fa9E2114bE';
-
-    let checkThisBal = 0xffffff;
+//    const debugAdd = '0x6134f697568592392a5AeacaEa8b01fa9E2114bE';
 
     const holdersDictLen = Object.keys(holdersDict).length;
-    let numQueriedAdds = 0;
+    let totalQueriedAddresses = 0;
 
     for(let holderAdd in holdersDict) {
         holdersPartialArray.push(holderAdd.toLowerCase());
-        ++numQueriedAdds;
+        ++totalQueriedAddresses; // counter for all queries
 
-        if(holderAdd == debugAdd) {
-            checkThisBal = numAddedToPartial;
-            console.log("reached debug ADD. num added to partial: " + numAddedToPartial);
-        }
         if(++numAddedToPartial < holdersPerArray) {
-//            console.log('holders dict len ' + holdersDictLen);
-//            console.log('num queried  ' + numQueriedAdds);
-            if (numQueriedAdds < holdersDictLen) continue;
+            if (totalQueriedAddresses < holdersDictLen) continue;
         }
 
         let balances = await GetBalance.methods.getKncBalance(holdersPartialArray).call();
-
-        if(checkThisBal != 0xffffff) {
-            let weiBal = web3.utils.toBN(balances[checkThisBal]);
-            let tokenBal = (weiBal.div(web3.utils.toBN(10 ** 16))) / 100;
-            console.log("checked balance: " + tokenBal);
-            console.log("checked balance: " + tokenBal);
-            console.log("checked balance: " + tokenBal);
-            checkThisBal = 0xffffff;
-        }
 
         for (let count = 0; count < balances.length; ++count) {
             let weiBalance = web3.utils.toBN(balances[count]);
 
             if (weiBalance > 0) {
-                ++totalKNCHoldersNum;
+                ++totalKNCHolders;
             }
 
             let tokenBalance = (weiBalance.div(web3.utils.toBN(10 ** 17))) / 10;
@@ -558,9 +510,9 @@ async function getKncHoldersBalanceDict(holdersDict, kncBalanceWaterMark) {
         }
 
         balancesQueriedSoFar = balancesQueriedSoFar * 1 + numAddedToPartial * 1;
-        console.log("total KNC holders number: " + totalKNCHoldersNum);
-        console.log("balances so far: " + balancesQueriedSoFar + " balance array length " + balances.length)
-        console.log("holders array length " + holdersPartialArray.length)
+        console.log("total KNC holders number: " + totalKNCHolders);
+        console.log("balance queries so far: " + balancesQueriedSoFar)
+        console.log("num KNC holders > " + balanceWaterMark + " is: " + Object.keys(kncBalanceDict).length);
 
         holdersPartialArray = [];
         numAddedToPartial = 0;
@@ -573,7 +525,8 @@ async function getKncHoldersBalanceDict(holdersDict, kncBalanceWaterMark) {
         console.log(e);
     }
 
-    console.log("num KNC holders: " + totalKNCHoldersNum);
+    console.log("total KNC holders number: " + totalKNCHolders);
+    console.log("balance queries so far: " + balancesQueriedSoFar)
     console.log("num KNC holders > " + balanceWaterMark + " is: " + Object.keys(kncBalanceDict).length);
 
     return kncBalanceDict;
