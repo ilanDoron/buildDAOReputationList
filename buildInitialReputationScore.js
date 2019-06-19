@@ -16,13 +16,10 @@ const sortedBalancesFileName = './KNCBalanceSorted.json';
 const feeSharingWalletsFile = './feeSharingWalletsAdds.json';
 const reservesKncWalletsFile = './reserveKncWalletsAdds.json';
 const reputationScorePath = './kyberDAOReputationScore.json';
-const daoFoundersPath = './output/kyberDAOFounders.json';
+const daoFoundersPath = './output/kyberDAOFounders.json';0
 
 
 process.on('unhandledRejection', console.error.bind(console))
-
-let ouputErrString = '';
-let ouputLogString = '';
 
 
 ////////
@@ -536,15 +533,10 @@ function myLog(error, highlight, string) {
     if (error) {
 //        console.error(string);
         console.log('\x1b[31m%s\x1b[0m', string);
-        ouputErrString += "\nerror: " + string;
-        ouputLogString += "\nerror: " + string;
     } else if (highlight) {
         console.log('\x1b[33m%s\x1b[0m', string);
-        ouputErrString += "\nwarning: " + string;
-        ouputLogString += "\nwarning: " + string;
     } else {
         console.log('\x1b[32m%s\x1b[0m', string);
-        ouputLogString += "\n     " + string;
     }
 };
 
