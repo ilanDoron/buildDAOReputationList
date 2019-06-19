@@ -122,33 +122,36 @@ async function main() {
         if(tempRep > 0) {
             ++extraRepTrading;
             console.log("address: " + holderAdd + " trading extra rep: " + tempRep);
+            rep = rep * 1 + tempRep * 1;
+            tempRep = 0;
         }
-        rep = rep * 1 + tempRep * 1;
-        tempRep = 0;
 
         //extra reputation for kyber team
         if (kyberTeamAdds[holderAdd] == true) tempRep = 40;
         if(tempRep > 0) {
             ++extraRepkyberTeam;
             console.log("address: " + holderAdd + " kyber team extra rep: " + tempRep);
+            rep = rep * 1 + tempRep * 1;
+            tempRep = 0;
         }
-        rep = rep * 1 + tempRep * 1;
 
         //extra reputation fee sharing wallets
         if (feeSharingWallets[holderAdd] == true) tempRep = 40;
         if(tempRep > 0) {
             ++extraRepfeeSharing;
             console.log("address: " + holderAdd + " fee share extra rep: " + tempRep);
+            rep = rep * 1 + tempRep * 1;
+            tempRep = 0;
         }
-        rep = rep * 1 + tempRep * 1;
 
         //extra reputation for reserves
         if (reserveKncWalletsAdds[holderAdd] == true) tempRep = 40;
         if(tempRep > 0) {
             ++extraRepReserves;
             console.log("address: " + holderAdd + " reserve extra rep: " + tempRep);
+            rep = rep * 1 + tempRep * 1;
+            tempRep = 0;
         }
-        rep = rep * 1 + tempRep * 1;
 
         //extra reputation for previous poll participants
 
@@ -156,8 +159,9 @@ async function main() {
         if(tempRep > 0) {
             console.log("address: " + holderAdd + " prev poll extra rep: " + tempRep);
             ++extraRepPrevPoll;
+            rep = rep * 1 + tempRep * 1;
+            tempRep = 0;
         }
-        rep = rep * 1 + tempRep * 1;
 
         daoReputation[holderAdd] = rep;
 
@@ -177,7 +181,7 @@ async function main() {
 
     console.log("founders array ready. size: " + founders.length)
     //save results to file
-    try {
+    try {s
         fs.writeFileSync(reputationScorePath, JSON.stringify(daoReputation, null, 2));
         fs.writeFileSync(daoFoundersPath, JSON.stringify(founders, null, 2));
         console.log("finished writing founders array to file: " + daoFoundersPath)
