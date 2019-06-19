@@ -121,43 +121,39 @@ async function main() {
         let tempRep = tradeVolumeToReputation(tradersVolumeEth[holderAdd]);
         if(tempRep > 0) {
             ++extraRepTrading;
-            console.log("address: " + holderAdd + " trading extra rep: " + tempRep);
+//            console.log("address: " + holderAdd + " trading extra rep: " + tempRep);
+            rep = rep * 1 + tempRep * 1;
+            tempRep = 0;
         }
-        rep = rep * 1 + tempRep * 1;
-        tempRep = 0;
 
         //extra reputation for kyber team
-        if (kyberTeamAdds[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) {
+        if (kyberTeamAdds[holderAdd] == true) {
             ++extraRepkyberTeam;
-            console.log("address: " + holderAdd + " kyber team extra rep: " + tempRep);
+//            console.log("address: " + holderAdd + " kyber team extra rep: " + tempRep);
+            rep = rep * 1 + 40 * 1;
         }
-        rep = rep * 1 + tempRep * 1;
 
         //extra reputation fee sharing wallets
-        if (feeSharingWallets[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) {
+        if (feeSharingWallets[holderAdd] == true) {
             ++extraRepfeeSharing;
-            console.log("address: " + holderAdd + " fee share extra rep: " + tempRep);
+//            console.log("address: " + holderAdd + " fee share extra rep: " + tempRep);
+            rep = rep * 1 + 40 * 1;
         }
-        rep = rep * 1 + tempRep * 1;
 
         //extra reputation for reserves
-        if (reserveKncWalletsAdds[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) {
+        if (reserveKncWalletsAdds[holderAdd] == true) {
             ++extraRepReserves;
-            console.log("address: " + holderAdd + " reserve extra rep: " + tempRep);
+//            console.log("address: " + holderAdd + " reserve extra rep: " + tempRep);
+            rep = rep * 1 + 40 * 1;
         }
-        rep = rep * 1 + tempRep * 1;
 
         //extra reputation for previous poll participants
 
-        if (prevPollAdds[holderAdd] == true) tempRep = 30;
-        if(tempRep > 0) {
-            console.log("address: " + holderAdd + " prev poll extra rep: " + tempRep);
+        if (prevPollAdds[holderAdd] == true) {
+//            console.log("address: " + holderAdd + " prev poll extra rep: " + tempRep);
             ++extraRepPrevPoll;
+            rep = rep * 1 + 30 * 1;
         }
-        rep = rep * 1 + tempRep * 1;
 
         daoReputation[holderAdd] = rep;
 
@@ -169,11 +165,11 @@ async function main() {
         founders.push(repRecord);
     }
 
-    console.log("extra rep trading" + extraRepTrading)
-    console.log("extra rep extraRepkyberTeam " + extraRepkyberTeam)
-    console.log("extra rep extraRepfeeSharing " + extraRepfeeSharing)
-    console.log("extra rep extraRepReserves " + extraRepReserves)
-    console.log("extra rep extraRepPrevPoll " + extraRepPrevPoll)
+    console.log("extra rep trading volume " + extraRepTrading)
+    console.log("extra rep extraRep kyberTeam " + extraRepkyberTeam)
+    console.log("extra rep extraR ep fee Sharing " + extraRepfeeSharing)
+    console.log("extra rep extraRep Reserves " + extraRepReserves)
+    console.log("extra rep extraRep Prev kyber DAO Poll " + extraRepPrevPoll)
 
     console.log("founders array ready. size: " + founders.length)
     //save results to file
