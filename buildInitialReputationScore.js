@@ -127,40 +127,32 @@ async function main() {
         }
 
         //extra reputation for kyber team
-        if (kyberTeamAdds[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) {
+        if (kyberTeamAdds[holderAdd] == true) {
             ++extraRepkyberTeam;
             console.log("address: " + holderAdd + " kyber team extra rep: " + tempRep);
-            rep = rep * 1 + tempRep * 1;
-            tempRep = 0;
+            rep = rep * 1 + 40 * 1;
         }
 
         //extra reputation fee sharing wallets
-        if (feeSharingWallets[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) {
+        if (feeSharingWallets[holderAdd] == true) {
             ++extraRepfeeSharing;
             console.log("address: " + holderAdd + " fee share extra rep: " + tempRep);
-            rep = rep * 1 + tempRep * 1;
-            tempRep = 0;
+            rep = rep * 1 + 40 * 1;
         }
 
         //extra reputation for reserves
-        if (reserveKncWalletsAdds[holderAdd] == true) tempRep = 40;
-        if(tempRep > 0) {
+        if (reserveKncWalletsAdds[holderAdd] == true)
             ++extraRepReserves;
             console.log("address: " + holderAdd + " reserve extra rep: " + tempRep);
-            rep = rep * 1 + tempRep * 1;
-            tempRep = 0;
+            rep = rep * 1 + 40 * 1;
         }
 
         //extra reputation for previous poll participants
 
-        if (prevPollAdds[holderAdd] == true) tempRep = 30;
-        if(tempRep > 0) {
+        if (prevPollAdds[holderAdd] == true) {
             console.log("address: " + holderAdd + " prev poll extra rep: " + tempRep);
             ++extraRepPrevPoll;
-            rep = rep * 1 + tempRep * 1;
-            tempRep = 0;
+            rep = rep * 1 + 30 * 1;
         }
 
         daoReputation[holderAdd] = rep;
