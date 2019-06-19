@@ -1,0 +1,55 @@
+{
+  "orgName": "Kyber DAO Exp#2",
+  "tokenName": "Kyber DAO Token",
+  "tokenSymbol": "KDT",
+
+  "ContributionReward": {
+  },
+  "SchemeRegistrar": {
+    "voteRegisterParams": 1,
+    "voteRemoveParams": 1
+  },
+  "VotingMachinesParams": [
+    {
+      "boostedVotePeriodLimit": 259200,
+      "daoBountyConst": 10,
+      "minimumDaoBounty": 50,
+      "queuedVotePeriodLimit": 604800,
+      "queuedVoteRequiredPercentage": 50,
+      "preBoostedVotePeriodLimit": 259200,
+      "proposingRepReward": 40,
+      "quietEndingPeriod": 86400,
+      "thresholdConst": 1200,
+      "voteOnBehalf": "0x0000000000000000000000000000000000000000",
+      "votersReputationLossRatio": 1,
+      "activationTime": 0
+    },
+    {
+      "boostedVotePeriodLimit": 604800,
+      "daoBountyConst": 10,
+      "minimumDaoBounty": 500,
+      "queuedVotePeriodLimit": 5184000,
+      "queuedVoteRequiredPercentage": 50,
+      "preBoostedVotePeriodLimit": 259200,
+      "proposingRepReward": 80,
+      "quietEndingPeriod": 259200,
+      "thresholdConst": 1500,
+      "voteOnBehalf": "0x0000000000000000000000000000000000000000",
+      "votersReputationLossRatio": 4,
+      "activationTime": 0
+    }
+  ],
+  "schemes": {
+    "ContributionReward": true,
+    "GenericScheme": false,
+    "SchemeRegistrar": true,
+    "GlobalConstraintRegistrar": false,
+    "UpgradeScheme": false
+  },
+  "unregisterOwner": true,
+  "useUController": false,
+  "useDaoCreator": true,
+
+  "founders": [
+  ]
+}
