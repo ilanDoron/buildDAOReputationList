@@ -147,11 +147,12 @@ async function main() {
         founders.push(repRecord);
     }
 
-
+    console.log("founders array ready. size: " + founders.length)
     //save results to file
     try {
         fs.writeFileSync(reputationScorePath, JSON.stringify(daoReputation, null, 2));
         fs.writeFileSync(daoFoundersPath, JSON.stringify(founders, null, 2));
+        console.log("finished writing founders array to file: " + daoFoundersPath)
     } catch(e) {
         console.log(e);
     }
